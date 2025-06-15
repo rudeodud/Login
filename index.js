@@ -53,7 +53,7 @@ let pool;
   `;
   await pool.query(createTableQuery);
 })();
-//mysql -u myuser -p;
+//mysql -u root -p;
 //USE mydatabase;
 //SELECT * FROM users;
 // ------------- 회원가입 라우터 ----------------
