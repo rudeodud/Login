@@ -140,6 +140,6 @@ app.get('/', (req, res) => {
 
 // ------------- 서버 실행 ----------------
 
-app.listen(PORT, () => {
-  console.log(`✅ 서버 실행 중: http://127.0.0.1:${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`✅ 서버 실행 중: http://192.168.45.92:${PORT}`);
 });
