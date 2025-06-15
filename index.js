@@ -1,8 +1,8 @@
 const express = require('express');
 const path = require('path');
-const fs = require('fs');
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
+const mysql = require('mysql2/promise');
 
 const app = express();
 const PORT = 5500;
@@ -10,9 +10,6 @@ const PORT = 5500;
 // body 파싱
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-// users.json 경로
-const usersFile = path.join(__dirname, 'users.json');
 
 // ---------------- 암호화 관련 ----------------
 const algorithm = 'aes-256-cbc';
@@ -33,21 +30,29 @@ function decryptUsername(encrypted) {
   return decrypted;
 }
 
-// ------------- 사용자 파일 처리 ----------------
+// ------------- MySQL 연결 설정 ----------------
+const dbConfig = {
+  host: 'localhost',
+  user: 'myuser',
+  password: 'mypassword',
+  database: 'mydatabase',
+};
 
-function readUsers() {
-  if (!fs.existsSync(usersFile)) return [];
-  const data = fs.readFileSync(usersFile, 'utf8');
-  try {
-    return JSON.parse(data);
-  } catch {
-    return [];
-  }
-}
 
-function saveUsers(users) {
-  fs.writeFileSync(usersFile, JSON.stringify(users, null, 2));
-}
+let pool; 
+(async () => {
+  pool = await mysql.createPool(dbConfig);
+
+  // 유저 테이블 생성 (최초 1회 실행용)
+  const createTableQuery = `
+    CREATE TABLE IF NOT EXISTS users (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      username VARCHAR(255) NOT NULL,
+      password VARCHAR(255) NOT NULL
+    );
+  `;
+  await pool.query(createTableQuery);
+})();
 
 // ------------- 회원가입 라우터 ----------------
 
@@ -58,27 +63,25 @@ app.post('/signup', async (req, res) => {
     return res.status(400).send('아이디와 비밀번호를 모두 입력하세요.');
   }
 
-  const users = readUsers();
-
-  // 중복 확인 (복호화해서 비교)
-  const exists = users.find(u => {
-    try {
-      return decryptUsername(u.username) === username;
-    } catch {
-      return false;
-    }
-  });
-
-  if (exists) {
-    return res.status(400).send('이미 존재하는 아이디입니다.');
-  }
-
   try {
+    // 중복 확인 (모든 유저 조회 후 복호화 비교)
+    const [rows] = await pool.query('SELECT username FROM users');
+    const exists = rows.some(row => {
+      try {
+        return decryptUsername(row.username) === username;
+      } catch {
+        return false;
+      }
+    });
+
+    if (exists) {
+      return res.status(400).send('이미 존재하는 아이디입니다.');
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
     const encryptedUsername = encryptUsername(username);
 
-    users.push({ username: encryptedUsername, password: hashedPassword });
-    saveUsers(users);
+    await pool.query('INSERT INTO users (username, password) VALUES (?, ?)', [encryptedUsername, hashedPassword]);
 
     res.send('회원가입 성공!');
   } catch (err) {
@@ -96,21 +99,20 @@ app.post('/login', async (req, res) => {
     return res.status(400).send('아이디와 비밀번호를 모두 입력하세요.');
   }
 
-  const users = readUsers();
-
-  const user = users.find(u => {
-    try {
-      return decryptUsername(u.username) === username;
-    } catch {
-      return false;
-    }
-  });
-
-  if (!user) {
-    return res.status(400).send('존재하지 않는 아이디입니다.');
-  }
-
   try {
+    const [rows] = await pool.query('SELECT username, password FROM users');
+    const user = rows.find(row => {
+      try {
+        return decryptUsername(row.username) === username;
+      } catch {
+        return false;
+      }
+    });
+
+    if (!user) {
+      return res.status(400).send('존재하지 않는 아이디입니다.');
+    }
+
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(400).send('비밀번호가 일치하지 않습니다.');
