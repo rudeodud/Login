@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>회원가입</title>
+    <style>
+        body {
+            margin: 20px;
+            background-color: #000000;
+            text-align: center;
+        }
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-evenly;
+            align-items: stretch;
+            gap: 20px;
+            margin-top: 40px;
+        }
+        .card {
+            background-color: white;
+            border: 1px solid white;
+            width: 500px;
+            height: 500px;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 2px 2px 5px white;
+        }
+        .button {
+            background-color: black;
+            color: white;
+            width: 200px;
+            box-shadow: 2px 2px 2px black;
+            font-size: 30px;
+            cursor: pointer;
+        }
+        .spansize {
+            font-size: 20px;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+        h1 {
+            font-size: 80px;
+        }
+        input {
+            font-size: 30px;
+            width: 80%;
+            padding: 10px;
+        }
+        #message {
+            margin-top: 15px;
+            font-size: 18px;
+            height: 24px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>회원가입</h1>
+            <input id="username" type="text" placeholder="아이디" /><br /><br />
+            <input id="password" type="password" placeholder="비밀번호" /><br /><br />
+            <input id="passwordCheck" type="password" placeholder="비밀번호 확인" /><br /><br />
+            <button id="signupBtn" class="button">회원가입하기</button><br /><br />
+            <span class="spansize" id="login">로그인</span>
+            <div id="message"></div>
+        </div>
+    </div>
+
+    <script>
+        const login = document.getElementById("login");
+        const signupBtn = document.getElementById("signupBtn");
+        const message = document.getElementById("message");
+
+        login.addEventListener("click", function () {
+            window.location.href = "http://127.0.0.1:5500/views/Login.html";
+        });
+
+        signupBtn.addEventListener("click", async () => {
+            const username = document.getElementById("username").value.trim();
+            const password = document.getElementById("password").value.trim();
+            const passwordCheck = document.getElementById("passwordCheck").value.trim();
+
+            if (!username || !password || !passwordCheck) {
+                message.style.color = "red";
+                message.textContent = "모든 필드를 입력해주세요.";
+                return;
+            }
+
+            if (password !== passwordCheck) {
+                message.style.color = "red";
+                message.textContent = "비밀번호가 일치하지 않습니다.";
+                return;
+            }
+
+            try {
+                const res = await fetch("/signup", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ username, password }),
+                });
+
+                const text = await res.text();
+
+                if (res.ok) {
+                    message.style.color = "green";
+                    message.textContent = text;
+                    // 성공 시 입력란 초기화
+                    document.getElementById("username").value = "";
+                    document.getElementById("password").value = "";
+                    document.getElementById("passwordCheck").value = "";
+                } else {
+                    message.style.color = "red";
+                    message.textContent = text;
+                }
+            } catch (error) {
+                message.style.color = "red";
+                message.textContent = "서버 오류가 발생했습니다.";
+            }
+        });
+    </script>
+</body>
+</html>
