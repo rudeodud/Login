@@ -76,65 +76,58 @@
     <div id="message"></div>
 
     <script>
-        const signup = document.getElementById("signup");
-        const loginBtn = document.getElementById("loginBtn");
-        const message = document.getElementById("message");
+    const signup = document.getElementById("signup");
+    const loginBtn = document.getElementById("loginBtn");
+    const message = document.getElementById("message");
 
-        signup.addEventListener("click", () => {
-            window.location.href = "http://127.0.0.1:5500/views/Signup.html";
-        });
+    signup.addEventListener("click", () => {
+        window.location.href = "http://127.0.0.1:5500/views/Signup.html";
+    });
 
-        loginBtn.addEventListener("click", async () => {
-            const username = document.getElementById("username").value.trim();
-            const password = document.getElementById("password").value.trim();
+    loginBtn.addEventListener("click", async () => {
+        const username = document.getElementById("username").value.trim();
+        const password = document.getElementById("password").value.trim();
 
-            if (!username || !password) {
-                message.style.color = "red";
-                message.textContent = "아이디와 비밀번호를 입력하세요.";
-                return;
-            }
-
-            try {
-                const res = await fetch('/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password })
-                });
-
-                const text = await res.text();
-
-                if (res.ok) {
-                    message.style.color = "green";
-                    message.textContent = text;
-                    // 로그인 성공 후 메인 페이지로 이동 (포트 5500 맞춤)
-                    setTimeout(() => {
-                        window.location.href = "http://127.0.0.1:5500/public/main.html";
-                    }, 1000);
-                } else {
-                    message.style.color = "red";
-                    message.textContent = text;
-                }
-            } catch (error) {
-                message.style.color = "red";
-                message.textContent = "서버 오류가 발생했습니다.";
-                console.error(error);
-            }
-        });
-         if (res.ok) {
-        message.style.color = "green";
-        message.textContent = text;
-        
-        // 로그인 성공 표시 저장
-        localStorage.setItem("loginSuccess", "true");
-
-        setTimeout(() => {
-            window.location.href = "http://127.0.0.1:5500/public/main.html";
-        }, 1000);
-        } else {
-        message.style.color = "red";
-        message.textContent = text;
+        if (!username || !password) {
+            message.style.color = "red";
+            message.textContent = "아이디와 비밀번호를 입력하세요.";
+            return;
         }
 
-    </script>
+        try {
+            const res = await fetch('/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+
+            const text = await res.text();
+
+            if (res.ok) {
+                message.style.color = "green";
+                message.textContent = text;
+
+                // ✅ 로그인 성공 시 localStorage에 저장
+                localStorage.setItem("loginSuccess", "true");
+
+                // 메인 페이지로 이동
+                setTimeout(() => {
+                    window.location.href = "http://127.0.0.1:5500/public/main.html";
+                }, 1000);
+            } else {
+                message.style.color = "red";
+                message.textContent = text;
+
+                // 실패 시 localStorage 초기화 (옵션)
+                localStorage.removeItem("loginSuccess");
+            }
+        } catch (error) {
+            message.style.color = "red";
+            message.textContent = "서버 오류가 발생했습니다.";
+            console.error(error);
+        }
+    });
+</script>
+
 </body>
 </html>

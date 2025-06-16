@@ -1,71 +1,76 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>메인 페이지</title>
-<style>
-  body {
-    margin: 20px;
-    background-color: #000000;
-    color: white;
-    font-family: Arial, sans-serif;
-  }
-  /* 오른쪽 위 고정 링크 */
-  .top-right {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    font-size: 18px;
-    z-index: 100;
-  }
-  .top-right a {
-    color: white;
-    margin-left: 15px;
-    text-decoration: underline;
-    cursor: pointer;
-  }
-  .top-right a:hover {
-    color: #4CAF50; /* 초록색 */
-  }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>메인 페이지</title>
+  <style>
+    body {
+      margin: 20px;
+      background-color: #000000;
+      color: white;
+      font-family: Arial, sans-serif;
+    }
 
-  .container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 90vh;
-  }
-  .card {
-    background-color: white;
-    color: black;
-    width: 500px;
-    height: 500px;
-    border-radius: 10px;
-    padding: 20px;
-    box-shadow: 2px 2px 5px white;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-  }
+    /* 오른쪽 위 고정 링크 */
+    .top-right {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      font-size: 18px;
+      z-index: 100;
+    }
 
-  h1 {
-    font-size: 80px;
-    margin-bottom: 40px;
-  }
+    .top-right a {
+      color: white;
+      margin-left: 15px;
+      text-decoration: underline;
+      cursor: pointer;
+    }
 
-  /* 체크박스 스타일, 체크되면 초록색 */
-  input[type="checkbox"] {
-    width: 30px;
-    height: 30px;
-    cursor: pointer;
-    accent-color: gray; /* 기본 체크색 */
-  }
-  input[type="checkbox"]:checked {
-    accent-color: #4CAF50; /* 체크 시 초록색 */
-  }
+    .top-right a:hover {
+      color: #4CAF50; /* 초록색 */
+    }
 
-</style>
+    .container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 90vh;
+    }
+
+    .card {
+      background-color: white;
+      color: black;
+      width: 500px;
+      height: 500px;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 2px 2px 5px white;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    h1 {
+      font-size: 80px;
+      margin-bottom: 40px;
+    }
+
+    /* 체크박스 기본 색상 */
+    #loginCheck {
+      width: 30px;
+      height: 30px;
+      cursor: pointer;
+      accent-color: gray;
+    }
+
+    /* 로그인 성공 시 체크박스 색상 */
+    #loginCheck.success {
+      accent-color: #4CAF50;
+    }
+  </style>
 </head>
 <body>
 
@@ -77,7 +82,7 @@
   <div class="container">
     <div class="card">
       <h1>메인페이지</h1>
-      <!-- 로그인 성공 시 체크박스가 체크되고 초록색으로 표시될 자리 -->
+      <!-- 로그인 성공 시 체크박스가 체크되고 초록색으로 표시 -->
       <label>
         <input type="checkbox" id="loginCheck" disabled />
         로그인 성공 체크
@@ -85,21 +90,20 @@
     </div>
   </div>
 
-<script>
-  window.addEventListener("DOMContentLoaded", () => {
-    const loginCheck = document.getElementById("loginCheck");
-    const loggedIn = localStorage.getItem("loginSuccess");
+  <script>
+    window.addEventListener("DOMContentLoaded", () => {
+      const loginCheck = document.getElementById("loginCheck");
+      const loggedIn = localStorage.getItem("loginSuccess");
 
-    if (loggedIn === "true") {
-      loginCheck.checked = true;
-      loginCheck.style.accentColor = "#4CAF50";  // 체크박스 초록색으로 변경
-    } else {
-      loginCheck.checked = false;
-      loginCheck.style.accentColor = "gray";
-    }
-  });
-</script>
-
+      if (loggedIn === "true") {
+        loginCheck.checked = true;
+        loginCheck.classList.add("success"); // 체크박스 초록색 클래스 추가
+      } else {
+        loginCheck.checked = false;
+        loginCheck.classList.remove("success");
+      }
+    });
+  </script>
 
 </body>
 </html>
