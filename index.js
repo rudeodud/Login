@@ -1,20 +1,35 @@
 const express = require('express');
 const path = require('path');
 const bcrypt = require('bcrypt');
-const crypto = require('crypto');
+// const crypto = require('crypto');
 const mysql = require('mysql2/promise');
 
 const app = express();
 const PORT = 5500;
 
 // body 파싱
+/*
+Client -> 10.34.3.3 
+Server => data -> WebServer -> Process -> Client
+
+Middleware ???
+
+Server => data -> Middleware 1 -> WebServer -> Process -> Middleware 2 -> Client
+
+
+Body Parser Middleware??
+
+=> 클라이언트가 보내는 데이터를 자바스크립트(express)에서 해석할 수 있도록 파싱(해석) 하는 미들웨어
+예: express.json() => JSON Parsing (요청/응답엔 Body라는 원하고자 하는 데이터가 있는데 그걸 해석하자는거)
+express.url ,, => URL Query Parsring = https://localhost:8080/sdfsdf?key=value
+ */
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // ---------------- 암호화 관련 ----------------
-const algorithm = 'aes-256-cbc';
-const secretKey = crypto.createHash('sha256').update('my_secret_key').digest(); // 실제는 .env에서
-const iv = Buffer.from('a2xhcgAAAAAAAAAA'); // 16바이트 고정 IV
+// const algorithm = 'aes-256-cbc';
+// const secretKey = crypto.createHash('sha256').update('my_secret_key').digest(); // 실제는 .env에서
+// const iv = Buffer.from('a2xhcgAAAAAAAAAA'); // 16바이트 고정 IV
 
 // function encryptUsername(username) {
 //   const cipher = crypto.createCipheriv(algorithm, secretKey, iv);
