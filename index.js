@@ -56,7 +56,7 @@ const dbConfig = {
 
 let pool; 
 (async () => {
-  pool = await mysql.createPool(dbConfig);
+  pool = mysql.createPool(dbConfig);
 
   // 유저 테이블 생성 (최초 1회 실행용)
   const createTableQuery = `
