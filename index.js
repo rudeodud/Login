@@ -16,19 +16,19 @@ const algorithm = 'aes-256-cbc';
 const secretKey = crypto.createHash('sha256').update('my_secret_key').digest(); // 실제는 .env에서
 const iv = Buffer.from('a2xhcgAAAAAAAAAA'); // 16바이트 고정 IV
 
-function encryptUsername(username) {
-  const cipher = crypto.createCipheriv(algorithm, secretKey, iv);
-  let encrypted = cipher.update(username, 'utf8', 'hex');
-  encrypted += cipher.final('hex');
-  return encrypted;
-}
+// function encryptUsername(username) {
+//   const cipher = crypto.createCipheriv(algorithm, secretKey, iv);
+//   let encrypted = cipher.update(username, 'utf8', 'hex');
+//   encrypted += cipher.final('hex');
+//   return encrypted;
+// }
 
-function decryptUsername(encrypted) {
-  const decipher = crypto.createDecipheriv(algorithm, secretKey, iv);
-  let decrypted = decipher.update(encrypted, 'hex', 'utf8');
-  decrypted += decipher.final('utf8');
-  return decrypted;
-}
+// function decryptUsername(encrypted) {
+//   const decipher = crypto.createDecipheriv(algorithm, secretKey, iv);
+//   let decrypted = decipher.update(encrypted, 'hex', 'utf8');
+//   decrypted += decipher.final('utf8');
+//   return decrypted;
+// }
 
 // ------------- MySQL 연결 설정 ----------------
 const dbConfig = {
@@ -70,7 +70,7 @@ app.post('/signup', async (req, res) => {
     const [rows] = await pool.query('SELECT username FROM users');
     const exists = rows.some(row => {
       try {
-        return decryptUsername(row.username) === username;
+        return row.username === username;
       } catch {
         return false;
       }
@@ -81,9 +81,8 @@ app.post('/signup', async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const encryptedUsername = encryptUsername(username);
 
-    await pool.query('INSERT INTO users (username, password) VALUES (?, ?)', [encryptedUsername, hashedPassword]);
+    await pool.query('INSERT INTO users (username, password) VALUES (?, ?)', [username, hashedPassword]);
 
     res.send('회원가입 성공!');
   } catch (err) {
@@ -105,7 +104,7 @@ app.post('/login', async (req, res) => {
     const [rows] = await pool.query('SELECT username, password FROM users');
     const user = rows.find(row => {
       try {
-        return decryptUsername(row.username) === username;
+        return row.username === username;
       } catch {
         return false;
       }
